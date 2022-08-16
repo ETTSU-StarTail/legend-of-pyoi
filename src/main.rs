@@ -1,5 +1,6 @@
 mod jvdt;
 
 fn main() {
-    println!("Hello, world!");
+    let jvlink: jvdt::AxJVLink = jvdt::AxJVLink::new();
+    println!("{:?}", jvlink);
 }

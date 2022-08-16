@@ -9,3 +9,14 @@ edition = "2021"
 bevy = "0.8.0"
 sqlx = { version = "0.6", features = [ "runtime-tokio-rustls" ] }
 tokio = { version = "1", features = [ "full" ] }
+
+[dependencies.windows]
+version = "0.39.0"
+features = [
+    "Data_Xml_Dom",
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_Com",
+    "Win32_System_Threading",
+    "Win32_UI_WindowsAndMessaging",
+]
