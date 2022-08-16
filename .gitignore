@@ -132,3 +132,7 @@ dmypy.json
 # Added by cargo
 
 /target
+
+
+# Added engineer
+src/external_dll/*.dll
