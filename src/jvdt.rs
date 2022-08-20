@@ -1,12 +1,17 @@
 // 元ネタ: JV-Linkインターフェース仕様書_4.8.0(Win).pdf, サンプルプログラム
 
 // FFI どうやるんじゃ？ -> Win32API によるアプローチに変更
+
 // NOTE: jv-link cls id = 2ab1774d-0c41-11d7-916f-0003479beb3f
+
+// NOTE: Rust 側に再現したプロパティやメソッドは
+//       Dispatcher によって取得したり、実行する
+//       ラッパーみたいなイメージ
 
 use windows::{core::GUID, w, Win32::System::Com::CLSIDFromProgID};
 
-/// IJVLink を再現する構造体
-struct IJVLinkProperty {
+/// AxJVLink を再現する構造体
+struct JVLink {
     /// m_saveflag<br/><br/>
     /// サーバからダウンロードしたファイルを m_save_path に保存するかどうかのフラグ<br/><br/>
     /// 0: 保存しない<br/>
@@ -65,37 +70,116 @@ struct IJVLinkProperty {
     m_pay_flag: i32,
 }
 
-/// IJVLink を再現するトレイト
-trait IJVLinkMethod {
-    ///
+/// AxJVLink を再現するトレイト
+trait JVLinkMethod {
+    /// JVInit<br/><br/>
+    /// JV-Link の初期化
     fn jv_init() -> i32;
+
+    /// JVSetUIProperties<br/><br/>
+    /// JV-Link の設定変更の為のダイアログ表示と値のセット
     fn jv_set_ui_properties() -> i32;
+
+    /// JVSetServiceKey<br/><br/>
+    /// JV-Link の利用キー設定
     fn jv_set_service_key() -> i32;
+
+    /// JVSetSaveFlag<br/><br/>
+    /// JV-Link の保存フラグの設定
     fn jv_set_save_flag() -> i32;
+
+    /// JVSetSavePath<br/><br/>
+    /// JV-Link の保存パスの設定
     fn jv_set_save_path() -> i32;
-    fn jv_set_pay_flag() -> i32;
+
+    /// JVOpen<br/><br/>
+    /// 蓄積系データの取得要求
     fn jv_open() -> i32;
+
+    /// JVRTOpen<br/><br/>
+    /// リアルタイム系データの取得要求
     fn jv_real_time_open() -> i32;
+
+    /// JVStatus<br/><br/>
+    /// ダウンロード進捗状況の取得
     fn jv_status() -> i32;
+
+    /// JVRead<br/><br/>
+    /// JV-Data を Unicode で 1 行読み込み
     fn jv_read() -> i32;
+
+    /// JVGets<br/><br/>
+    /// JV-Data を SJIS で 1 行読み込み<br/>
+    /// ※メモリ解法をしない為、明示的な解放が必要
     fn jv_gets() -> i32;
+
+    /// JVSkip<br/><br/>
+    /// JV-Data を 1 行読み飛ばす
     fn jv_skip() -> i32;
+
+    /// JVCancel<br/><br/>
+    /// ダウンロードスレッドの停止
     fn jv_cancel() -> i32;
+
+    /// JVClose<br/><br/>
+    /// JV-Data 読込処理の終了
     fn jv_close() -> i32;
+
+    /// JVFiledelete<br/><br/>
+    /// ダウンロードしたファイルの削除
     fn jv_file_delete() -> i32;
-    /// JVFukuFile:
+
+    /// JVFukuFile<br/><br/>
+    /// 勝負服画像情報を要求
     fn jv_cloth_file() -> i32;
+
+    /// JVFuku<br/><br/>
+    /// 勝負服画像情報をバイナリで要求
     fn jv_cloth() -> i32;
-    fn jv_movie_check() -> i32;
-    fn jv_movie_check_with_type() -> i32;
-    fn jv_movie_play() -> i32;
-    fn jv_movie_play_with_type() -> i32;
-    fn jv_movie_open() -> i32;
-    fn jv_movie_read() -> i32;
+
+    /// JVMVCheck<br/><br/>
+    /// JRA レーシングビュアーにあるレース映像の公開チェック要求
+    fn jv_racing_movie_check() -> i32;
+
+    /// JVMVCheckWithType<br/><br/>
+    /// JRA レーシングビュアーにある指定タイプの映像の公開チェック要求
+    fn jv_racing_movie_check_with_type() -> i32;
+
+    /// JVMVPlay<br/><br/>
+    /// JRA レーシングビュアーにあるレース映像の再生要求
+    fn jv_racing_movie_play() -> i32;
+
+    /// JVMVPlayWithType<br/><br/>
+    /// JRA レーシングビュアーにある指定タイプの映像の再生要求
+    fn jv_racing_movie_play_with_type() -> i32;
+
+    /// JVMVOpen<br/><br/>
+    /// 動画リスト取得
+    fn jv_racing_movie_open() -> i32;
+
+    /// JVMVRead<br/><br/>
+    /// 動画リスト読込
+    fn jv_racing_movie_read() -> i32;
+
+    /// JVCourseFile<br/><br/>
+    /// 最新コース図およびコース説明を取得
     fn jv_course_file() -> i32;
+
+    /// JVCourseFile2<br/><br/>
+    /// 最新コース図の取得要求し、任意パスに保存
     fn jv_course_file_2() -> i32;
+
+    /// JVWatchEvent<br/><br/>
+    /// 確定・変更情報の発生イベントの通知を開始<br/>
+    /// JV-Link からのイベント受理が可能になる
     fn jv_watch_event() -> i32;
+
+    /// JVWatchEventClose<br/><br/>
+    /// 確定・変更情報の発生イベントの通知を終了
     fn jv_watch_event_close() -> i32;
+
+    // サンプルプログラムに有ってインターフェースにないやつ
+    // fn jv_set_pay_flag() -> i32;
 }
 
 /// recreate AxJVLink class
